@@ -4,16 +4,19 @@ declare(strict_types=1);
 
 namespace LaminasTest\Escaper;
 
+use function chr;
+
 use Exception;
 use Generator;
+
+use function in_array;
+
 use Laminas\Escaper\Escaper;
 use Laminas\Escaper\Exception\InvalidArgumentException;
 use Override;
+
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
-
-use function chr;
-use function in_array;
 
 final class EscaperTest extends TestCase
 {
@@ -323,7 +326,7 @@ final class EscaperTest extends TestCase
      */
     public function testUnicodeCodepointConversionToUtf8(): void
     {
-        $expected   = " ~ޙ";
+        $expected   = ' ~ޙ';
         $codepoints = [0x20, 0x7e, 0x799];
         $result     = '';
         foreach ($codepoints as $value) {

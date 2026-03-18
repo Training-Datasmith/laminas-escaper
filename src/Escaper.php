@@ -7,6 +7,10 @@ namespace Laminas\Escaper;
 use function assert;
 use function bin2hex;
 use function ctype_digit;
+
+use const ENT_QUOTES;
+use const ENT_SUBSTITUTE;
+
 use function hexdec;
 use function htmlspecialchars;
 use function in_array;
@@ -19,11 +23,9 @@ use function rawurlencode;
 use function sprintf;
 use function strlen;
 use function strtolower;
+
 use function strtoupper;
 use function substr;
-
-use const ENT_QUOTES;
-use const ENT_SUBSTITUTE;
 
 /**
  * Context specific methods for use in secure output escaping
