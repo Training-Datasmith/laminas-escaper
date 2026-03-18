@@ -60,10 +60,8 @@ class Escaper implements EscaperInterface
     /**
      * Holds the value of the special flags passed as second parameter to
      * htmlspecialchars().
-     *
-     * @var int
      */
-    protected $htmlSpecialCharsFlags;
+    protected int $htmlSpecialCharsFlags;
 
     /**
      * Static Matcher which escapes characters for HTML Attribute contexts
@@ -178,7 +176,7 @@ class Escaper implements EscaperInterface
     }
 
     /** @inheritDoc */
-    public function escapeHtml(string $string)
+    public function escapeHtml(string $string): string
     {
         return htmlspecialchars($string, $this->htmlSpecialCharsFlags, $this->encoding);
     }
@@ -212,7 +210,7 @@ class Escaper implements EscaperInterface
     }
 
     /** @inheritDoc */
-    public function escapeUrl(string $string)
+    public function escapeUrl(string $string): string
     {
         return rawurlencode($string);
     }
@@ -236,9 +234,8 @@ class Escaper implements EscaperInterface
      * escaping to all matches.
      *
      * @param array<array-key, string> $matches
-     * @return string
      */
-    protected function htmlAttrMatcher($matches)
+    protected function htmlAttrMatcher(array $matches): string
     {
         $chr = $matches[0];
         $ord = ord($chr[0]);
@@ -283,9 +280,8 @@ class Escaper implements EscaperInterface
      * escaping to all matches.
      *
      * @param array<array-key, string> $matches
-     * @return string
      */
-    protected function jsMatcher($matches)
+    protected function jsMatcher(array $matches): string
     {
         $chr = $matches[0];
         if (strlen($chr) === 1) {
@@ -306,9 +302,8 @@ class Escaper implements EscaperInterface
      * escaping to all matches.
      *
      * @param array<array-key, string> $matches
-     * @return string
      */
-    protected function cssMatcher($matches)
+    protected function cssMatcher(array $matches): string
     {
         $chr = $matches[0];
         if (strlen($chr) === 1) {
@@ -363,9 +358,8 @@ class Escaper implements EscaperInterface
      * Checks if a given string appears to be valid UTF-8 or not.
      *
      * @param string $string
-     * @return bool
      */
-    protected function isUtf8($string)
+    protected function isUtf8($string): bool
     {
         return $string === '' || preg_match('/^./su', $string);
     }
@@ -378,7 +372,7 @@ class Escaper implements EscaperInterface
      * @param array|string $from
      * @return string
      */
-    protected function convertEncoding($string, $to, $from)
+    protected function convertEncoding($string, $to, $from): string|array
     {
         $result = mb_convert_encoding($string, $to, $from);
 
