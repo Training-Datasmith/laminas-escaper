@@ -374,7 +374,7 @@ class Escaper implements EscaperInterface
      * @param array|string $from
      * @return string
      */
-    protected function convertEncoding($string, $to, $from): string|array
+    protected function convertEncoding($string, $to, $from): string
     {
         $result = mb_convert_encoding($string, $to, $from);
 
