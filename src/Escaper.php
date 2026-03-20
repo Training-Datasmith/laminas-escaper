@@ -116,19 +116,44 @@ class Escaper implements Escaper_Interface
     /**
      * Return the encoding that all output/input is expected to be encoded in.
      *
-     * @return non-empty-string
+     * @return non-empty-string The lowercase encoding label (e.g. 'utf-8', 'iso-8859-1')
+     * @since 2.0.0
      */
-    public function get_encoding()
+    public function get_encoding(): string
     {
         return $this->encoding;
     }
-    /** @inheritDoc */
+    /**
+     * Escape a string for safe output in the HTML body context.
+     *
+     * Uses htmlspecialchars() internally. Safe for text between HTML tags.
+     * Do NOT use for attribute values — use escape_html_attr() instead.
+     *
+     * @param string $string The raw, unescaped string to output in HTML body context
+     * @return string The HTML-safe escaped string
+     * @see escape_html_attr() For escaping inside HTML attribute values
+     * @complexity O(n) where n is the length of $string
+     * @since 2.0.0
+     */
     public function escape_html(string $string): string
     {
         return htmlspecialchars($string, $this->html_special_chars_flags, $this->encoding);
     }
-    /** @inheritDoc */
-    public function escape_html_attr(string $string)
+    /**
+     * Escape a string for safe output inside HTML attribute values.
+     *
+     * Uses an extended set of characters beyond htmlspecialchars() to cover
+     * unquoted and backtick-quoted attribute edge cases (per OWASP).
+     * Characters beyond alphanumerics and safe punctuation are hex-entity encoded.
+     *
+     * @param string $string The raw, unescaped string to place inside an HTML attribute
+     * @return string The attribute-safe escaped string
+     * @throws Exception\RuntimeException If the string cannot be converted to UTF-8
+     * @see escape_html() For escaping in the HTML body context
+     * @complexity O(n) where n is the length of $string
+     * @since 2.0.0
+     */
+    public function escape_html_attr(string $string): string
     {
         $string = $this->to_utf8($string);
         if ($string === '' || ctype_digit($string)) {
@@ -138,8 +163,20 @@ class Escaper implements Escaper_Interface
         assert(is_string($result));
         return $this->from_utf8($result);
     }
-    /** @inheritDoc */
-    public function escape_js(string $string)
+    /**
+     * Escape a string for safe embedding inside a JavaScript string literal.
+     *
+     * Does not use json_encode(). Uses hex/unicode escaping to ensure the output
+     * is safe even when HTML escaping was not applied on top. Backslash escaping
+     * is intentionally avoided as it leaves the underlying character intact.
+     *
+     * @param string $string The raw, unescaped string to embed in JavaScript
+     * @return string The JavaScript-safe escaped string
+     * @throws Exception\RuntimeException If the string cannot be converted to UTF-8
+     * @complexity O(n) where n is the length of $string
+     * @since 2.0.0
+     */
+    public function escape_js(string $string): string
     {
         $string = $this->to_utf8($string);
         if ($string === '' || ctype_digit($string)) {
@@ -149,13 +186,35 @@ class Escaper implements Escaper_Interface
         assert(is_string($result));
         return $this->from_utf8($result);
     }
-    /** @inheritDoc */
+    /**
+     * Escape a string for safe use as a URI component or query parameter value.
+     *
+     * Delegates to rawurlencode(), which implements RFC 3986. Use only for
+     * individual URI sub-components (e.g. a single query parameter value),
+     * NOT for encoding an entire URI.
+     *
+     * @param string $string The raw, unescaped URI subcomponent value
+     * @return string The percent-encoded string safe for inclusion in a URI
+     * @complexity O(n) where n is the length of $string
+     * @since 2.0.0
+     */
     public function escape_url(string $string): string
     {
         return rawurlencode($string);
     }
-    /** @inheritDoc */
-    public function escape_css(string $string)
+    /**
+     * Escape a string for safe embedding inside a CSS property value or selector.
+     *
+     * Escapes everything except alphanumerics using CSS hex escape sequences.
+     * Safe for use inside CSS string contexts or as unquoted identifier values.
+     *
+     * @param string $string The raw, unescaped string to embed in CSS
+     * @return string The CSS-safe escaped string
+     * @throws Exception\RuntimeException If the string cannot be converted to UTF-8
+     * @complexity O(n) where n is the length of $string
+     * @since 2.0.0
+     */
+    public function escape_css(string $string): string
     {
         $string = $this->to_utf8($string);
         if ($string === '' || ctype_digit($string)) {
@@ -242,13 +301,17 @@ class Escaper implements Escaper_Interface
         return sprintf('\%X ', $ord);
     }
     /**
-     * Converts a string to UTF-8 from the base encoding. The base encoding is set via this
+     * Convert a string to UTF-8 from the configured base encoding.
      *
-     * @param string $string
-     * @throws Exception\RuntimeException
-     * @return string
+     * Used internally before applying regex-based escaping routines that
+     * require UTF-8 input.
+     *
+     * @param string $string The string in the configured base encoding
+     * @return string The string re-encoded as UTF-8
+     * @throws Exception\RuntimeException If the string is not valid UTF-8 after conversion
+     * @see get_encoding() For the configured base encoding
      */
-    protected function to_utf8($string)
+    protected function to_utf8(string $string): string
     {
         if ($this->get_encoding() === 'utf-8') {
             $result = $string;
@@ -261,12 +324,16 @@ class Escaper implements Escaper_Interface
         return $result;
     }
     /**
-     * Converts a string from UTF-8 to the base encoding. The base encoding is set via this
+     * Convert a string from UTF-8 back to the configured base encoding.
      *
-     * @param string $string
-     * @return string
+     * Used internally after regex-based escaping to restore the original encoding.
+     * Returns the string unchanged when the configured encoding is already UTF-8.
+     *
+     * @param string $string The UTF-8 encoded string to convert back
+     * @return string The string in the configured base encoding
+     * @see to_utf8() The inverse operation
      */
-    protected function from_utf8($string)
+    protected function from_utf8(string $string): string
     {
         if ($this->get_encoding() === 'utf-8') {
             return $string;
@@ -274,23 +341,27 @@ class Escaper implements Escaper_Interface
         return $this->convert_encoding($string, $this->get_encoding(), 'UTF-8');
     }
     /**
-     * Checks if a given string appears to be valid UTF-8 or not.
+     * Check whether a string is valid UTF-8.
      *
-     * @param string $string
+     * @param string $string The string to test for UTF-8 validity
+     * @return bool True if $string is empty or passes the UTF-8 regex, false otherwise
      */
-    protected function is_utf8($string): bool
+    protected function is_utf8(string $string): bool
     {
         return $string === '' || preg_match('/^./su', $string);
     }
     /**
-     * Encoding conversion helper which wraps mb_convert_encoding
+     * Convert a string's encoding, wrapping mb_convert_encoding() with a safe fallback.
      *
-     * @param string $string
-     * @param string $to
-     * @param array|string $from
-     * @return string
+     * Returns an empty string on conversion failure rather than a fatal error,
+     * providing graceful degradation for invalid input sequences.
+     *
+     * @param string $string The string to convert
+     * @param string $to The target encoding (e.g. 'UTF-8', 'UTF-32BE')
+     * @param array<string>|string $from The source encoding or list of candidate encodings
+     * @return string The converted string, or empty string on failure
      */
-    protected function convert_encoding($string, $to, $from): string
+    protected function convert_encoding(string $string, string $to, array|string $from): string
     {
         $result = mb_convert_encoding($string, $to, $from);
         if ($result === false) {
