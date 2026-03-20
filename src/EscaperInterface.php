@@ -1,13 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Laminas\Escaper;
 
 /**
  * Interface for context specific methods for use in secure output escaping
  */
-interface EscaperInterface
+interface Escaper_Interface
 {
     /**
      * Escape a string for the HTML Body context where there are very few characters
@@ -15,8 +14,7 @@ interface EscaperInterface
      *
      * @return ($string is non-empty-string ? non-empty-string : string)
      */
-    public function escapeHtml(string $string);
-
+    public function escape_html(string $string);
     /**
      * Escape a string for the HTML Attribute context. We use an extended set of characters
      * to escape that are not covered by htmlspecialchars() to cover cases where an attribute
@@ -24,8 +22,7 @@ interface EscaperInterface
      *
      * @return ($string is non-empty-string ? non-empty-string : string)
      */
-    public function escapeHtmlAttr(string $string);
-
+    public function escape_html_attr(string $string);
     /**
      * Escape a string for the Javascript context. This does not use json_encode(). An extended
      * set of characters are escaped beyond ECMAScript's rules for Javascript literal string
@@ -37,8 +34,7 @@ interface EscaperInterface
      *
      * @return ($string is non-empty-string ? non-empty-string : string)
      */
-    public function escapeJs(string $string);
-
+    public function escape_js(string $string);
     /**
      * Escape a string for the URI or Parameter contexts. This should not be used to escape
      * an entire URI - only a subcomponent being inserted. The function is a simple proxy
@@ -46,13 +42,12 @@ interface EscaperInterface
      *
      * @return ($string is non-empty-string ? non-empty-string : string)
      */
-    public function escapeUrl(string $string);
-
+    public function escape_url(string $string);
     /**
      * Escape a string for the CSS context. CSS escaping can be applied to any string being
      * inserted into CSS and escapes everything except alphanumerics.
      *
      * @return ($string is non-empty-string ? non-empty-string : string)
      */
-    public function escapeCss(string $string);
+    public function escape_css(string $string);
 }

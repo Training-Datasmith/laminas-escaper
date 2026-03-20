@@ -1,13 +1,11 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Laminas\Escaper\Exception;
 
 /**
  * Invalid argument exception
  */
-class InvalidArgumentException extends \InvalidArgumentException implements
-    ExceptionInterface
+class InvalidArgumentException extends \InvalidArgumentException implements Exception_Interface
 {
 }
